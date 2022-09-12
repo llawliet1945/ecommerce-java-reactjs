@@ -3,7 +3,6 @@ package com.myusufalpian.projectecommerce.controllers;
 import com.myusufalpian.projectecommerce.dto.ResponseData;
 import com.myusufalpian.projectecommerce.dto.SearchData;
 import com.myusufalpian.projectecommerce.models.entities.ProductEntity;
-import com.myusufalpian.projectecommerce.models.repositories.CategoryRepository;
 import com.myusufalpian.projectecommerce.services.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,9 +20,6 @@ import java.util.List;
 public class ProductController {
     @Autowired
     private ProductService productService;
-
-    @Autowired
-    private CategoryRepository categoryRepository;
 
     @GetMapping("getAllData")
     public Iterable<ProductEntity> getAllData(){

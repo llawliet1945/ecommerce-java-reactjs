@@ -58,8 +58,6 @@ public class AuthController {
         userEntity.setRole("user");
         userEntity.setPassword(signUpRequest.getPassword());
         
-        UserEntity add = userService.save(userEntity);
-        
-        return add;
+        return userService.save(userEntity);
     }
 }

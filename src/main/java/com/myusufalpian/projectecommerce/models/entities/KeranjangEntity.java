@@ -1,7 +1,6 @@
 package com.myusufalpian.projectecommerce.models.entities;
 
 import lombok.*;
-import org.springframework.data.jpa.repository.JpaRepository;
 
 import javax.persistence.*;
 import java.io.Serializable;
