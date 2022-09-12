@@ -40,9 +40,12 @@ public class AuthController {
     @PostMapping("/signin")
     public ResponseEntity<JwtResponse> authenticateUser(@RequestBody LoginRequest loginRequest){
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+
         SecurityContextHolder.getContext().setAuthentication(authentication);
+        
         String token = jwtUtils.generateJwtToken(authentication);
         UserDetailsImplementation userDetailsImplementation = (UserDetailsImplementation) authentication.getPrincipal();
+        
         return ResponseEntity.ok().body(new JwtResponse(token, userDetailsImplementation.getUsername(), userDetailsImplementation.getEmail()));
     }
 
@@ -54,7 +57,9 @@ public class AuthController {
         userEntity.setEmail(signUpRequest.getEmail());
         userEntity.setRole("user");
         userEntity.setPassword(signUpRequest.getPassword());
+        
         UserEntity add = userService.save(userEntity);
+        
         return add;
     }
 }
