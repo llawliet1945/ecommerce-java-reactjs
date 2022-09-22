@@ -5,6 +5,7 @@ import lombok.*;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 
 @Entity
 @Data
@@ -15,6 +16,9 @@ import java.math.BigDecimal;
 @ToString
 @Table(name = "tb_produk")
 public class ProductEntity implements Serializable {
+
+    public ProductEntity(String produkId) {
+    }
 
     private static final long serialVersionUID = 1L;
 
@@ -34,7 +38,7 @@ public class ProductEntity implements Serializable {
     private int stok;
 
     @Column(name = "harga_produk")
-    private BigDecimal harga;
+    private BigInteger harga;
 
     @ManyToOne
     @JoinColumn

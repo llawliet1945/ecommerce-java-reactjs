@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import com.myusufalpian.projectecommerce.securities.service.UserDetailsImplementation;
 
 import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;

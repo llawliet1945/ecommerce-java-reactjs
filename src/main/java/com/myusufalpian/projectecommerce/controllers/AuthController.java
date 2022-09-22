@@ -7,12 +7,11 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import com.myusufalpian.projectecommerce.models.entities.JwtResponse;
 import com.myusufalpian.projectecommerce.models.entities.LoginRequest;
 import com.myusufalpian.projectecommerce.models.entities.SignUpRequest;
@@ -32,7 +31,7 @@ public class AuthController {
     UserService userService;
 
     @Autowired
-    PasswordEncoder passwordEncoder;
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Autowired
     JwtUtils jwtUtils;
@@ -56,8 +55,10 @@ public class AuthController {
         userEntity.setNama(signUpRequest.getNama());
         userEntity.setEmail(signUpRequest.getEmail());
         userEntity.setRole("user");
-        userEntity.setPassword(signUpRequest.getPassword());
-        
+        userEntity.setAlamat(signUpRequest.getAlamat());
+        String encodedPassword = bCryptPasswordEncoder.encode(signUpRequest.getPassword());
+        userEntity.setPassword(encodedPassword);
+        userEntity.setIsActive(true);
         return userService.save(userEntity);
     }
 }

@@ -15,6 +15,10 @@ import java.io.Serializable;
 @Table(name = "tb_pengguna")
 public class UserEntity implements Serializable {
 
+    public UserEntity(String username2) {
+        this.username = username2;
+    }
+
     private static final long serialVersionUID = 1L;
 
     @Id

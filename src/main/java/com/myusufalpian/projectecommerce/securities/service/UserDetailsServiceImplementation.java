@@ -9,8 +9,6 @@ import org.springframework.stereotype.Service;
 import com.myusufalpian.projectecommerce.models.entities.UserEntity;
 import com.myusufalpian.projectecommerce.models.repositories.UserRepository;
 
-import net.bytebuddy.asm.Advice.Return;
-
 @Service
 public class UserDetailsServiceImplementation implements UserDetailsService{
     @Autowired

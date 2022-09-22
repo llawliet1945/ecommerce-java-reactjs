@@ -9,5 +9,6 @@ public class SignUpRequest implements Serializable{
     private String username;
     private String email;
     private String nama;
+    private String alamat;
     private String password;
 }
