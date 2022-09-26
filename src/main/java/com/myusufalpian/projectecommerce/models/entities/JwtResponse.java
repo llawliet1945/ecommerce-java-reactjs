@@ -7,10 +7,11 @@ import lombok.Data;
 @Data
 public class JwtResponse implements Serializable{
     private String token;
-    private String type = "bearer";
-    private String email;
+    private String type = "Bearer";
     private String username;
-    public JwtResponse(String accessToken, String email, String username) {
+    private String email;
+
+    public JwtResponse(String accessToken, String username, String email) {
         this.token = accessToken;
         this.email = email;
         this.username = username;

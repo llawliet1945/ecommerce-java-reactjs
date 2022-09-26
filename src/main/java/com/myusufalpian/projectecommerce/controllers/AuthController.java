@@ -11,7 +11,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 import com.myusufalpian.projectecommerce.models.entities.JwtResponse;
 import com.myusufalpian.projectecommerce.models.entities.LoginRequest;
 import com.myusufalpian.projectecommerce.models.entities.SignUpRequest;
@@ -31,7 +32,7 @@ public class AuthController {
     UserService userService;
 
     @Autowired
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
+    PasswordEncoder passwordEncoder;
 
     @Autowired
     JwtUtils jwtUtils;
@@ -39,7 +40,7 @@ public class AuthController {
     @PostMapping("/signin")
     public ResponseEntity<JwtResponse> authenticateUser(@RequestBody LoginRequest loginRequest){
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
-
+        
         SecurityContextHolder.getContext().setAuthentication(authentication);
         
         String token = jwtUtils.generateJwtToken(authentication);
@@ -56,7 +57,7 @@ public class AuthController {
         userEntity.setEmail(signUpRequest.getEmail());
         userEntity.setRole("user");
         userEntity.setAlamat(signUpRequest.getAlamat());
-        String encodedPassword = bCryptPasswordEncoder.encode(signUpRequest.getPassword());
+        String encodedPassword = passwordEncoder.encode(signUpRequest.getPassword());
         userEntity.setPassword(encodedPassword);
         userEntity.setIsActive(true);
         return userService.save(userEntity);

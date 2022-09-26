@@ -1,6 +1,8 @@
 package com.myusufalpian.projectecommerce.securities.service;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -10,13 +12,13 @@ import org.springframework.util.StringUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.myusufalpian.projectecommerce.models.entities.UserEntity;
 
-import java.util.List;
-import java.util.ArrayList;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @AllArgsConstructor
+@NoArgsConstructor
 @Setter
 @Getter
 public class UserDetailsImplementation implements UserDetails{
@@ -24,7 +26,7 @@ public class UserDetailsImplementation implements UserDetails{
     private String username;
     private String email;
     private String nama;
-    @JsonIgnore
+    private String alamat;
     private String password;
     @JsonIgnore
     private String role;
@@ -32,31 +34,21 @@ public class UserDetailsImplementation implements UserDetails{
     public static UserDetailsImplementation build(UserEntity userEntity){
         return new UserDetailsImplementation(userEntity.getUsername(), userEntity.getEmail(), 
         userEntity.getNama(), 
+        userEntity.getAlamat(),
         userEntity.getPassword(), 
         userEntity.getRole());
     }
-    
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<GrantedAuthority> authorities = new ArrayList<>();
         if(StringUtils.hasText(role)){
-            String [] splits = role.replaceAll("", "").split(",");
+            String [] splits = role.replaceAll(" ", "").split(",");
             for(String string : splits){
                 authorities.add(new SimpleGrantedAuthority(string));
             }
         }
         return authorities;
-    }
-
-    @Override
-    public String getPassword() {
-        return null;
-    }
-
-    @Override
-    public String getUsername() {
-        return null;
     }
 
     @Override
