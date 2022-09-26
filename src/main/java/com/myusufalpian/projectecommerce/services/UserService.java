@@ -58,18 +58,18 @@ public class UserService {
 
     }
 
-    public UserEntity findById(String id){
-        return userRepository.findById(id)
+    public UserEntity findById(String username){
+        return userRepository.findById(username)
                 .orElseThrow(() -> new ResourceNotFoundException("pengguna dengan Id: "+
-                        id+" tidak ditemukan!"));
+                username+" tidak ditemukan!"));
     }
 
     public List<UserEntity> findAll(){
         return userRepository.findAll();
     }
 
-    public void removeOne(String id){
-        userRepository.deleteById(id);
+    public void removeOne(String username){
+        userRepository.deleteById(username);
     }
 
     public UserEntity getUserByNama(String nama){
