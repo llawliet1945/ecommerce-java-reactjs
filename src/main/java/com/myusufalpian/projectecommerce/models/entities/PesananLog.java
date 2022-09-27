@@ -18,7 +18,7 @@ public class PesananLog implements Serializable {
 
     private Integer logType;
 
-    private Integer logMessage;
+    private String logMessage;
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date waktu;
