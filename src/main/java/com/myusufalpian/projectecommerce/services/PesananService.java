@@ -14,6 +14,7 @@ import com.myusufalpian.projectecommerce.dto.CartRequest;
 import com.myusufalpian.projectecommerce.dto.PesananRequestDTO;
 import com.myusufalpian.projectecommerce.dto.PesananResponseDTO;
 import com.myusufalpian.projectecommerce.exceptions.BadRequestException;
+import com.myusufalpian.projectecommerce.exceptions.ResourceNotFoundException;
 import com.myusufalpian.projectecommerce.models.entities.PesananEntity;
 import com.myusufalpian.projectecommerce.models.entities.PesananItem;
 import com.myusufalpian.projectecommerce.models.entities.ProductEntity;
@@ -105,5 +106,28 @@ public class PesananService {
 
     private String generateNomor(){
         return String.format("%016d", System.nanoTime());
+    }
+
+    public PesananEntity cancel(String id, String username){
+        
+        PesananEntity pesanan = pesananRepository.findById(id).orElseThrow(()-> new ResourceNotFoundException("Pesanan dengan id: "+id+" tidak ditemukan!"));
+
+        if(!username.equals(pesanan.getUser().getUsername())){
+            throw new BadRequestException("Pesanan hanya dapat dibatalkan oleh yang bersangkutan!");
+        }
+
+        if(!StatusPesanan.PENGIRIMAN.equals(pesanan.getStatus())){
+            throw new BadRequestException("Pesanan tidak dapat dibatalkan karena sedang dalam proses pengiriman!");
+        }else if(!StatusPesanan.SELESAI.equals(pesanan.getStatus())){
+            throw new BadRequestException("Pesanan tidak dapat dibatalkan karena pesanan sudah diterima!");
+        }
+
+        pesanan.setStatus(StatusPesanan.DIBATALKAN);
+        PesananEntity save = pesananRepository.save(pesanan);
+
+        pesananLogService.saveLog(username, pesanan, PesananLogService.DIBATALKAN, "Pesanan berhasil dibatalkan!");
+
+        return save;
+
     }
 }
