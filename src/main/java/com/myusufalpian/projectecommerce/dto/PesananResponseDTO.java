@@ -29,7 +29,7 @@ public class PesananResponseDTO implements Serializable{
 
     @Data
     public static class Item implements Serializable{
-        private String productId;
+        private Integer productId;
         private String namaProduct;
         private BigInteger qty;
         private BigInteger harga;
@@ -53,7 +53,7 @@ public class PesananResponseDTO implements Serializable{
         for (PesananItem pesananItem : pesananItems) {
         
             Item item = new Item();
-            item.setProductId(pesananItem.getProduct().getId());
+            item.setProductId(Integer.parseInt(pesananItem.getProduct().getId()));
             item.setNamaProduct(pesananItem.getProduct().getNama());
             item.setQty(pesananItem.getJumlah());
             item.setHarga(pesananItem.getHarga());

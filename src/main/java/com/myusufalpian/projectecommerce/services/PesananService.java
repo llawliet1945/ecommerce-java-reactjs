@@ -2,11 +2,14 @@ package com.myusufalpian.projectecommerce.services;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Optional;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,6 +46,7 @@ public class PesananService {
     private PesananLogService pesananLogService;
 
 
+
     @Transactional
     public PesananResponseDTO add(String username, PesananRequestDTO request){
         PesananEntity pesanan = new PesananEntity();
@@ -57,22 +61,25 @@ public class PesananService {
 
         List<PesananItem> pemesanan = new ArrayList<>();
         for (CartRequest cart : request.getItems()) {
-            ProductEntity product = productRepository.findById(cart.getProductId()).orElseThrow(()-> new BadRequestException("Product dengan id: "+cart.getProductId()+" tidak ditemukan"));
+            Optional<ProductEntity> product = productRepository.findById(cart.getProductId());
+            product.orElseThrow(()-> new BadRequestException("Product dengan id: "+cart.getProductId()+" tidak ditemukan"));
             
-            if(product.getStok()<cart.getQty().intValue()){
-                throw new BadRequestException("Stok produk tidak mencukupi, produk hanya tersedia: "+product.getStok());
+            if(product.get().getStok()<cart.getQty().intValue()){
+                throw new BadRequestException("Stok produk tidak mencukupi, produk hanya tersedia: "+product.get().getStok());
             }
 
             PesananItem pesananItem = new PesananItem();
             pesananItem.setId(UUID.randomUUID().toString());
-            pesananItem.setProduct(product);
-            pesananItem.setHarga(product.getHarga());
+            pesananItem.setProduct(product.get());
+            pesananItem.setHarga(product.get().getHarga());
             pesananItem.setKuantitas(cart.getQty());
+
             int hrg = pesananItem.getHarga().intValue();
             int qty = pesananItem.getKuantitas().intValue();
             Integer total = hrg * qty;
             pesananItem.setJumlah(BigInteger.valueOf(total));
             pesananItem.setPemesanan(pesanan);
+            
             pemesanan.add(pesananItem);
         
         }
@@ -87,15 +94,16 @@ public class PesananService {
         pesanan.setTotal(pesanan.getJumlah().add(pesanan.getOngkir()));
 
         PesananEntity save = pesananRepository.save(pesanan);
-
+        
         for (PesananItem p : pemesanan) {
             pesananItemRepository.save(p);
-            ProductEntity product = new ProductEntity();
+            ProductEntity product = new ProductEntity(p.getProduct().getId());
             product.setStok(product.getStok()-p.getKuantitas().intValue());
             productRepository.save(product);
-            cartService.delete(username, product.getId());
+            cartService.delete(username, p.getProduct().getId());
         }
-
+        
+        
         pesananLogService.saveLog(username, pesanan, PesananLogService.DRAFT, "Pesanan berhasil dibuat!");
 
         PesananResponseDTO response = new PesananResponseDTO(save, pemesanan);
@@ -108,6 +116,7 @@ public class PesananService {
         return String.format("%016d", System.nanoTime());
     }
 
+    @Transactional
     public PesananEntity cancel(String id, String username){
         
         PesananEntity pesanan = pesananRepository.findById(id).orElseThrow(()-> new ResourceNotFoundException("Pesanan dengan id: "+id+" tidak ditemukan!"));
@@ -130,4 +139,91 @@ public class PesananService {
         return save;
 
     }
+
+
+    @Transactional
+    public PesananEntity receive(String id, String username){
+        
+        PesananEntity pesanan = pesananRepository.findById(id).orElseThrow(()-> new ResourceNotFoundException("Pesanan dengan id: "+id+" tidak ditemukan!"));
+
+        if(!username.equals(pesanan.getUser().getUsername())){
+            throw new BadRequestException("Pesanan hanya dapat dibatalkan oleh yang bersangkutan!");
+        }
+
+        if(!StatusPesanan.PENGIRIMAN.equals(pesanan.getStatus())){
+            throw new BadRequestException("Penerimaan gagal, status pesanan saat ini adalah: "+ pesanan.getStatus());
+        }
+
+        pesanan.setStatus(StatusPesanan.SELESAI);
+        PesananEntity save = pesananRepository.save(pesanan);
+
+        pesananLogService.saveLog(username, pesanan, PesananLogService.SELESAI, "Pesanan telah diterima!");
+
+        return save;
+
+    }
+
+    public List<PesananEntity> findAllPesanan(String username, int page, int limit){
+        return pesananRepository.findByUserUsername(username, PageRequest.of(page, limit, Sort.by("waktu_pemesanan").descending()));
+    }
+    
+    @Transactional
+    public PesananEntity confirmationPayment(String id, String username){
+        
+        PesananEntity pesanan = pesananRepository.findById(id).orElseThrow(()-> new ResourceNotFoundException("Pesanan dengan id: "+id+" tidak ditemukan!"));
+
+        if(!StatusPesanan.DRAFT.equals(pesanan.getStatus())){
+            throw new BadRequestException("Konfirmasi pembayaran gagal, status pesanan saat ini adalah: "+ pesanan.getStatus());
+        }
+
+        pesanan.setStatus(StatusPesanan.PEMBAYARAN);
+        PesananEntity save = pesananRepository.save(pesanan);
+
+        pesananLogService.saveLog(username, pesanan, PesananLogService.PEMBAYARAN, "Pembayaran sukses dikonfirmasi, terimakasih atas pembayarannya, pesanan akan segera diproses");
+
+        return save;
+
+    }
+
+    @Transactional
+    public PesananEntity packing(String id, String username){
+        
+        PesananEntity pesanan = pesananRepository.findById(id).orElseThrow(()-> new ResourceNotFoundException("Pesanan dengan id: "+id+" tidak ditemukan!"));
+
+        if(!StatusPesanan.PACKING.equals(pesanan.getStatus())){
+            throw new BadRequestException("Packing pesanan belum dilakukan, status pesanan saat ini adalah: "+ pesanan.getStatus());
+        }
+
+        pesanan.setStatus(StatusPesanan.PACKING);
+        PesananEntity save = pesananRepository.save(pesanan);
+
+        pesananLogService.saveLog(username, pesanan, PesananLogService.PACKING, "Pesanan sedang diproses dan akan segera dikirimkan ke alamat tujuan");
+
+        return save;
+
+    }
+
+    @Transactional
+    public PesananEntity sent(String id, String username){
+        
+        PesananEntity pesanan = pesananRepository.findById(id).orElseThrow(()-> new ResourceNotFoundException("Pesanan dengan id: "+id+" tidak ditemukan!"));
+
+        if(!StatusPesanan.PACKING.equals(pesanan.getStatus())){
+            throw new BadRequestException("Pengiriman pesanan belum dilakukan, status pesanan saat ini adalah: "+ pesanan.getStatus());
+        }
+
+        pesanan.setStatus(StatusPesanan.DIKIRIM);
+        PesananEntity save = pesananRepository.save(pesanan);
+
+        pesananLogService.saveLog(username, pesanan, PesananLogService.PENGIRIMAN, "Pesanan sedang dikirimkan ke alamat tujuan");
+
+        return save;
+
+    }
+
+    public List<PesananEntity> search(String filterText, int page, int limit){
+        return pesananRepository.search(filterText, PageRequest.of(page, limit, Sort.by("waktu_pemesanan").descending()));
+    }
+
+
 }

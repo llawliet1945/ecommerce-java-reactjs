@@ -16,13 +16,14 @@ import java.math.BigInteger;
 @Table(name = "tb_produk")
 public class ProductEntity implements Serializable {
 
-    public ProductEntity(String produkId) {
+    public ProductEntity(Integer produkId) {
     }
 
     private static final long serialVersionUID = 1L;
 
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
     @Column(name = "nama_produk", length = 100)
     private String nama;
