@@ -39,12 +39,12 @@ public class CartController {
     }
 
     @PatchMapping("/{productId}/{qty}")
-    public KeranjangEntity updateCart(@AuthenticationPrincipal UserDetailsImplementation user, @PathVariable BigInteger qty, @PathVariable String productId){
+    public KeranjangEntity updateCart(@AuthenticationPrincipal UserDetailsImplementation user, @PathVariable BigInteger qty, @PathVariable Integer productId){
         return cartService.updateQty(user.getUsername(), productId, qty);
     }
 
     @DeleteMapping("/{productId}")
-    public void deleteCart(@AuthenticationPrincipal UserDetailsImplementation user, @PathVariable String productId){
+    public void deleteCart(@AuthenticationPrincipal UserDetailsImplementation user, @PathVariable Integer productId){
         cartService.delete(user.getUsername(), productId);
         cartService.findByUserUsername(user.getUsername());
     }

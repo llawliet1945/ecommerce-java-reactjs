@@ -40,12 +40,12 @@ public class ProductService {
                         "Kategori dengan id: "+productEntity.getCategory().getId()+" tidak ditemukan!"
                 ));
 
-        productEntity.setId(UUID.randomUUID().toString());
+        productEntity.setUuid(UUID.randomUUID().toString());
         return productRepository.save(productEntity);
     }
 
     public ProductEntity update(ProductEntity productEntity){
-        if(!StringUtils.hasText(productEntity.getId())){
+        if(!StringUtils.hasText(productEntity.getId().toString())){
             throw new BadRequestException("Id produk tidak boleh kosong!");
         }
 
@@ -68,7 +68,7 @@ public class ProductService {
         return productRepository.save(productEntity);
     }
 
-    public ProductEntity findById(String id){
+    public ProductEntity findById(Integer id){
         return productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Produk dengan Id: "+
                         id+" tidak ditemukan!"));
@@ -78,7 +78,7 @@ public class ProductService {
         return productRepository.findAll();
     }
 
-    public void removeOne(String id){
+    public void removeOne(Integer id){
         productRepository.deleteById(id);
     }
 
@@ -90,7 +90,7 @@ public class ProductService {
         return productRepository.findByNamaStartingWith(nama);
     }
 
-    public ProductEntity changePicture(String id, String gambar){
+    public ProductEntity changePicture(Integer id, String gambar){
         ProductEntity productEntity = findById(id);
         productEntity.setGambar(gambar);
         return productRepository.save(productEntity);

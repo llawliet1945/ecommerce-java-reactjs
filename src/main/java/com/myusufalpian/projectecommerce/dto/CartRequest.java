@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CartRequest implements Serializable{
     
-    private String productId;
+    private Integer productId;
     private BigInteger qty;
 
 }

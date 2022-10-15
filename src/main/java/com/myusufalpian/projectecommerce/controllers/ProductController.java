@@ -16,7 +16,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/product")
-//  localhost:5050/api/product
 public class ProductController {
     @Autowired
     private ProductService productService;
@@ -27,7 +26,7 @@ public class ProductController {
     }
 
     @GetMapping("getById")
-    public ProductEntity getById(@RequestParam String id){
+    public ProductEntity getById(@RequestParam Integer id){
         return productService.findById(id);
     }
 
@@ -68,7 +67,7 @@ public class ProductController {
     }
 
     @DeleteMapping(value = "deleteProduct")
-    public Iterable<ProductEntity> deleteData(@RequestParam String id){
+    public Iterable<ProductEntity> deleteData(@RequestParam Integer id){
         productService.removeOne(id);
         return productService.findAll();
     }

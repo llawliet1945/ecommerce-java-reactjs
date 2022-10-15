@@ -66,15 +66,15 @@ public class PesananController {
 
     @GetMapping("/getAllData")
     @PreAuthorize("hasAuthority('user')")
-    public List<PesananEntity> getAllData(@AuthenticationPrincipal UserDetailsImplementation user, @RequestParam(name = "page", defaultValue = 0, required = false) Integer page, @RequestParam(name = "limit", defaultValue = 25, required = false) Integer limit){
+    public List<PesananEntity> getAllData(@AuthenticationPrincipal UserDetailsImplementation user, @RequestParam(name = "page", defaultValue = "0", required = false) Integer page, @RequestParam(name = "limit", defaultValue = "25", required = false) Integer limit){
         return pesananService.findAllPesanan(user.getUsername(), page, limit);
     }
 
     @GetMapping("/getOrderItems")
     @PreAuthorize("hasAuthority('user')")
     public List<PesananEntity> getOrderItems(@AuthenticationPrincipal  UserDetailsImplementation user, 
-        @RequestParam(name = "page", defaultValue = 0, required = false) Integer page, 
-        @RequestParam(name = "limit", defaultValue = 25, required = false) Integer limit, 
+        @RequestParam(name = "page", defaultValue = "0", required = false) Integer page,
+        @RequestParam(name = "limit", defaultValue = "25", required = false) Integer limit,
         @RequestParam(name = "filterText", defaultValue = "", required = false) String filterText){
         return pesananService.search(filterText, page, limit);
     }

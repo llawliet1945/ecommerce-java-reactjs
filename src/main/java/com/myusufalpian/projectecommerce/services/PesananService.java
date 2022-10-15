@@ -103,7 +103,6 @@ public class PesananService {
             cartService.delete(username, p.getProduct().getId());
         }
         
-        
         pesananLogService.saveLog(username, pesanan, PesananLogService.DRAFT, "Pesanan berhasil dibuat!");
 
         PesananResponseDTO response = new PesananResponseDTO(save, pemesanan);

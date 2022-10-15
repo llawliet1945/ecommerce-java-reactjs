@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface KeranjangRepository extends JpaRepository<KeranjangEntity, String> {
 
-    Optional<KeranjangEntity> findByUserUsernameAndProductId(String username, String produkId);
+    Optional<KeranjangEntity> findByUserUsernameAndProductId(String username, Integer produkId);
 
     List<KeranjangEntity> findByUserUsername(String username);
 }
