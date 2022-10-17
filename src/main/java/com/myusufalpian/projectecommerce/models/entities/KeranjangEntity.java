@@ -20,7 +20,10 @@ public class KeranjangEntity implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    private String uuid;
 
     @ManyToOne
     @JoinColumn

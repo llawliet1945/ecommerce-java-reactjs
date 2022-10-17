@@ -14,7 +14,7 @@ import lombok.Data;
 
 @Data
 public class PesananResponseDTO implements Serializable{
-    private String id;
+    private Integer id;
     private String nomorPesanan;
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone="Asia/Jakarta")
     private Date tanggal;

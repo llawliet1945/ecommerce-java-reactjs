@@ -7,9 +7,11 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface KeranjangRepository extends JpaRepository<KeranjangEntity, String> {
+public interface KeranjangRepository extends JpaRepository<KeranjangEntity, Integer> {
 
-    Optional<KeranjangEntity> findByUserUsernameAndProductId(String username, Integer produkId);
+    Optional<KeranjangEntity> findByUserUsernameAndProductUuid(String username, String uuid);
 
     List<KeranjangEntity> findByUserUsername(String username);
+
+    Optional<KeranjangEntity> findByUuid(String uuid);
 }

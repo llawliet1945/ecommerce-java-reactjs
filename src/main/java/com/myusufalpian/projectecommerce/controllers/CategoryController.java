@@ -27,8 +27,8 @@ public class CategoryController {
     }
 
     @GetMapping("getById")
-    public CategoryEntity getById(@RequestParam String id){
-        return categoryService.findById(id);
+    public CategoryEntity getById(@RequestParam String uuid){
+        return categoryService.findByUuid(uuid);
     }
 
     @PostMapping("addNewCategory")

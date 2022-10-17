@@ -19,7 +19,10 @@ public class PesananItem implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    private String uuid;
 
     @Column(name = "kuantitas_pemesanan_item")
     private BigInteger kuantitas;

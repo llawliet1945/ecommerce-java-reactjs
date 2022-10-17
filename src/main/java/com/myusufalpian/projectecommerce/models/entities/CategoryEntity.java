@@ -17,7 +17,11 @@ public class CategoryEntity implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    @Column(name = "uuid_kategori")
+    private String uuid;
 
     @Column(name = "nama_kategori", length = 35)
     private String nama;

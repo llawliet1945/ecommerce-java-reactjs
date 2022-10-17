@@ -19,7 +19,11 @@ public class PesananEntity implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    @Id
+    private String uuid;
 
     @Column(name = "nomor_pemesanan", length = 100)
     private String nomor;

@@ -31,7 +31,7 @@ public class ProductService {
             throw new BadRequestException("Kategori tidak boleh kosong!");
         }
 
-        if(!StringUtils.hasText(productEntity.getCategory().getId())){
+        if(!StringUtils.hasText(productEntity.getCategory().getUuid())){
             throw new BadRequestException("Id kategori tidak boleh kosong!");
         }
 
@@ -57,7 +57,7 @@ public class ProductService {
             throw new BadRequestException("Kategori tidak boleh kosong!");
         }
 
-        if(!StringUtils.hasText(productEntity.getCategory().getId())){
+        if(!StringUtils.hasText(productEntity.getCategory().getUuid())){
             throw new BadRequestException("Id kategori tidak boleh kosong!");
         }
 

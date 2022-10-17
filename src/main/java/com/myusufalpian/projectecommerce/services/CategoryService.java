@@ -17,7 +17,7 @@ public class CategoryService {
     private CategoryRepository categoryRepository;
 
     public CategoryEntity save(CategoryEntity categoryEntity){
-        categoryEntity.setId(UUID.randomUUID().toString());
+        categoryEntity.setUuid(UUID.randomUUID().toString());
         return categoryRepository.save(categoryEntity);
     }
 
@@ -25,18 +25,17 @@ public class CategoryService {
         return categoryRepository.save(categoryEntity);
     }
 
-    public CategoryEntity findById(String id){
-        return categoryRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Kategori dengan Id: "+
-                        id+" tidak ditemukan!"));
+    public CategoryEntity findByUuid(String uuid){
+        return categoryRepository.findByUuid(uuid)
+                .orElseThrow(() -> new ResourceNotFoundException("Kategori tidak ditemukan!"));
     }
 
     public List<CategoryEntity> findAll(){
         return categoryRepository.findAll();
     }
 
-    public void removeOne(String id){
-        categoryRepository.deleteById(id);
+    public void removeOne(String uuid){
+        categoryRepository.deleteByUuid(uuid);
     }
 
 }

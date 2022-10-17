@@ -35,17 +35,18 @@ public class CartController {
 
     @PostMapping("/")
     public KeranjangEntity addNewCart(@AuthenticationPrincipal UserDetailsImplementation user, @RequestBody CartRequest cart){
-        return cartService.save(user.getUsername(), cart.getProductId(), cart.getQty());
+        return cartService.save(user.getUsername(), cart.getProductUuid(), cart.getQty());
     }
 
     @PatchMapping("/{productId}/{qty}")
-    public KeranjangEntity updateCart(@AuthenticationPrincipal UserDetailsImplementation user, @PathVariable BigInteger qty, @PathVariable Integer productId){
-        return cartService.updateQty(user.getUsername(), productId, qty);
+    public KeranjangEntity updateCart(@AuthenticationPrincipal UserDetailsImplementation user,
+                                      @PathVariable BigInteger qty, @PathVariable String productUuid){
+        return cartService.updateQty(user.getUsername(), productUuid, qty);
     }
 
     @DeleteMapping("/{productId}")
-    public void deleteCart(@AuthenticationPrincipal UserDetailsImplementation user, @PathVariable Integer productId){
-        cartService.delete(user.getUsername(), productId);
+    public void deleteCart(@AuthenticationPrincipal UserDetailsImplementation user, @PathVariable String productUuid){
+        cartService.delete(user.getUsername(), productUuid);
         cartService.findByUserUsername(user.getUsername());
     }
 }
