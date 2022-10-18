@@ -22,7 +22,6 @@ public class PesananEntity implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Id
     private String uuid;
 
     @Column(name = "nomor_pemesanan", length = 100)

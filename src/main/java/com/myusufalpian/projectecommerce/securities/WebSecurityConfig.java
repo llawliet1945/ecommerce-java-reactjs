@@ -23,10 +23,32 @@ import com.myusufalpian.projectecommerce.securities.jwt.AuthTokenFilter;
 public class WebSecurityConfig {
     @Autowired
     private AuthEntryPointJwt unAuththorizedHandler;
-    
+    private static final String[] AUTH_WHITELIST = {
+            "/api/auth/**",
+            "/api/v3/**",
+            "/v3/**",
+            "/api/swagger-ui/**"
+    };
     @Bean
     SecurityFilterChain filterChain(HttpSecurity security)throws Exception{
-        security.cors().and().csrf().disable().exceptionHandling().authenticationEntryPoint(unAuththorizedHandler).and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authorizeRequests().antMatchers("/api/auth/**").permitAll().antMatchers("/api/**").permitAll().anyRequest().authenticated();
+        security
+                .cors()
+                .and()
+                .csrf()
+                .disable()
+                .exceptionHandling()
+                .authenticationEntryPoint(unAuththorizedHandler)
+                .and()
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .authorizeRequests()
+                .antMatchers(AUTH_WHITELIST)
+                .permitAll()
+                .antMatchers("/api/**")
+                .permitAll()
+                .anyRequest()
+                .authenticated();
         security.addFilterBefore(authTokenFilter(), UsernamePasswordAuthenticationFilter.class);
         return security.build();
     }
