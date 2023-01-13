@@ -8,13 +8,12 @@ import java.math.BigInteger;
 import java.util.Date;
 
 @Entity
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Setter
 @Getter
 @ToString
-@Table(name = "tb_pesanan")
+@Table(name = "tb_pesanan", schema = "public")
 public class PesananEntity implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -22,7 +21,6 @@ public class PesananEntity implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Id
     private String uuid;
 
     @Column(name = "nomor_pemesanan", length = 100)
@@ -32,9 +30,8 @@ public class PesananEntity implements Serializable {
     @Temporal(TemporalType.DATE)
     private Date tanggal;
 
-    @ManyToOne
-    @JoinColumn
-    private UserEntity user;
+    @Column(name = "user_id")
+    private String userId;
 
     @Column(name = "alamat_pengiriman", length = 300)
     private String alamat;

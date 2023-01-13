@@ -14,7 +14,7 @@ import java.util.Date;
 @Setter
 @Getter
 @ToString
-@Table(name = "tb_keranjang")
+@Table(name = "tb_keranjang", schema = "public")
 public class KeranjangEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -25,13 +25,11 @@ public class KeranjangEntity implements Serializable {
 
     private String uuid;
 
-    @ManyToOne
-    @JoinColumn
-    private ProductEntity product;
-
-    @ManyToOne
-    @JoinColumn
-    private UserEntity user;
+    @Column(name = "product_id")
+    private Integer productId;
+    
+    @Column(name = "user_id")
+    private String userId;
 
     private BigInteger kuantitas;
 

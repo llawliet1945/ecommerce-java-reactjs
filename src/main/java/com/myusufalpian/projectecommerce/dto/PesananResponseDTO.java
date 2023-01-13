@@ -18,7 +18,7 @@ public class PesananResponseDTO implements Serializable{
     private String nomorPesanan;
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone="Asia/Jakarta")
     private Date tanggal;
-    private String namaPelanggan;
+    private String userId;
     private String alamatPengirimaan;
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone="Asia/Jakarta")
     private Date waktuPemesanan;
@@ -42,7 +42,7 @@ public class PesananResponseDTO implements Serializable{
         this.id = pesananEntity.getId();
         this.nomorPesanan = pesananEntity.getNomor();
         this.tanggal = pesananEntity.getTanggal();
-        this.namaPelanggan = pesananEntity.getUser().getNama();
+        this.userId = pesananEntity.getUserId();
         this.alamatPengirimaan = pesananEntity.getAlamat();
         this.ongkosKirim = pesananEntity.getOngkir();
         this.waktuPemesanan = pesananEntity.getWaktu();
@@ -54,8 +54,7 @@ public class PesananResponseDTO implements Serializable{
         for (PesananItem pesananItem : pesananItems) {
         
             Item item = new Item();
-            item.setProductId(Integer.parseInt(pesananItem.getProduct().getId().toString()));
-            item.setNamaProduct(pesananItem.getProduct().getNama());
+            item.setProductId(pesananItem.getProductId());
             item.setQty(pesananItem.getJumlah());
             item.setHarga(pesananItem.getHarga());
             item.setJumlah(pesananItem.getJumlah());

@@ -26,7 +26,12 @@ public class WebSecurityConfig {
     
     @Bean
     SecurityFilterChain filterChain(HttpSecurity security)throws Exception{
-        security.cors().and().csrf().disable().exceptionHandling().authenticationEntryPoint(unAuththorizedHandler).and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authorizeRequests().antMatchers("/api/auth/**").permitAll().antMatchers("/api/**").permitAll().anyRequest().authenticated();
+        security.cors().and().csrf().disable().exceptionHandling().authenticationEntryPoint(unAuththorizedHandler).and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authorizeRequests()
+        .antMatchers("/api/auth/**").permitAll()
+        .antMatchers("/v3/api-docs/**").permitAll()
+        .antMatchers("/swagger-ui/**").permitAll()
+        .antMatchers("/api/**").permitAll()
+        .anyRequest().authenticated();
         security.addFilterBefore(authTokenFilter(), UsernamePasswordAuthenticationFilter.class);
         return security.build();
     }

@@ -1,14 +1,12 @@
 package com.myusufalpian.projectecommerce.services;
 
 import java.util.Date;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.myusufalpian.projectecommerce.models.entities.PesananEntity;
 import com.myusufalpian.projectecommerce.models.entities.PesananLog;
-import com.myusufalpian.projectecommerce.models.entities.UserEntity;
 import com.myusufalpian.projectecommerce.models.repositories.PesananLogRepository;
 
 @Service
@@ -27,11 +25,10 @@ public class PesananLogService {
     public void saveLog(String username, PesananEntity pesanan, int type, String message){
 
         PesananLog p = new PesananLog();
-        p.setId(UUID.randomUUID().toString());
         p.setLogMessage(message);
         p.setLogType(type);
-        p.setPemesanan(pesanan);
-        p.setUser(new UserEntity(username));
+        p.setPemesanan(pesanan.getId());
+        p.setUserId(username);
         p.setWaktu(new Date());
 
         pesananLogRepository.save(p);

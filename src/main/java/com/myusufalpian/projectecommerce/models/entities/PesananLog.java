@@ -8,14 +8,14 @@ import java.util.Date;
 
 @Data
 @Entity
-@Table(name = "tb_pesanan_log")
+@Table(name = "tb_pesanan_log", schema = "public")
 public class PesananLog implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private String id;
+    private Integer id;
 
     private String uuid;
 
@@ -26,12 +26,10 @@ public class PesananLog implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date waktu;
 
-    @ManyToOne
-    @JoinColumn
-    private PesananEntity pemesanan;
+    @Column(name = "pemesanan_id")
+    private Integer pemesanan;
 
-    @ManyToOne
-    @JoinColumn
-    private UserEntity user;
+    @Column(name = "user_id")
+    private String userId;
 
 }

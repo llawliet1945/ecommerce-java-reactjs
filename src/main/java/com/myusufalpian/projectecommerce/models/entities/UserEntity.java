@@ -12,7 +12,7 @@ import java.io.Serializable;
 @Setter
 @Getter
 @ToString
-@Table(name = "tb_pengguna")
+@Table(name = "tb_pengguna", schema = "public")
 public class UserEntity implements Serializable {
 
     public UserEntity(String username2) {

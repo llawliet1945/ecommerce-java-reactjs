@@ -27,17 +27,13 @@ public class ProductService {
             throw new BadRequestException("Nama produk tidak boleh kosong!");
         }
 
-        if(productEntity.getCategory()==null){
+        if(productEntity.getIdCategory()==null){
             throw new BadRequestException("Kategori tidak boleh kosong!");
         }
 
-        if(!StringUtils.hasText(productEntity.getCategory().getUuid())){
-            throw new BadRequestException("Id kategori tidak boleh kosong!");
-        }
-
-        categoryRepository.findById(productEntity.getCategory().getId())
+        categoryRepository.findById(productEntity.getIdCategory())
                 .orElseThrow(() -> new BadRequestException(
-                        "Kategori dengan id: "+productEntity.getCategory().getId()+" tidak ditemukan!"
+                        "Kategori dengan id: "+productEntity.getIdCategory()+" tidak ditemukan!"
                 ));
 
         productEntity.setUuid(UUID.randomUUID().toString());
@@ -53,17 +49,13 @@ public class ProductService {
             throw new BadRequestException("Nama produk tidak boleh kosong!");
         }
 
-        if(productEntity.getCategory()==null){
+        if(productEntity.getIdCategory()==null){
             throw new BadRequestException("Kategori tidak boleh kosong!");
         }
 
-        if(!StringUtils.hasText(productEntity.getCategory().getUuid())){
-            throw new BadRequestException("Id kategori tidak boleh kosong!");
-        }
-
-        categoryRepository.findById(productEntity.getCategory().getId())
+        categoryRepository.findById(productEntity.getIdCategory())
                 .orElseThrow(() -> new BadRequestException(
-                        "Kategori dengan id: "+productEntity.getCategory().getId()+" tidak ditemukan!"
+                        "Kategori dengan id: "+productEntity.getIdCategory()+" tidak ditemukan!"
                 ));
         return productRepository.save(productEntity);
     }

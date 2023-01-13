@@ -11,7 +11,7 @@ import java.io.Serializable;
 @Getter
 @ToString
 @Entity
-@Table(name = "tb_kategori")
+@Table(name = "tb_kategori", schema = "public")
 public class CategoryEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;

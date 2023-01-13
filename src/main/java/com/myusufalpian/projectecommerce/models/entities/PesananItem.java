@@ -13,7 +13,7 @@ import java.math.BigInteger;
 @Setter
 @Getter
 @ToString
-@Table(name = "tb_pesanan_item")
+@Table(name = "tb_pesanan_item", schema = "public")
 public class PesananItem implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -31,12 +31,10 @@ public class PesananItem implements Serializable {
 
     @Column(name = "jumlah_pemesanan_item")
     private BigInteger jumlah;
-
-    @ManyToOne
-    @JoinColumn
-    private ProductEntity product;
-
-    @ManyToOne
-    @JoinColumn
-    private PesananEntity pemesanan;
+    
+    @Column(name = "product_id")
+    private Integer productId;
+    
+    @Column(name = "pemesanan_id")
+    private Integer pemesananId;
 }

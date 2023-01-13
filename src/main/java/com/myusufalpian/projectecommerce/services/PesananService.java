@@ -53,7 +53,7 @@ public class PesananService {
         pesanan.setUuid(UUID.randomUUID().toString());
         pesanan.setTanggal(new Date());
         pesanan.setNomor(generateNomor());
-        pesanan.setUser(new UserEntity(username));
+        pesanan.setUserId(username);
         pesanan.setAlamat(request.getAlamatPengiriman());
         pesanan.setStatus(StatusPesanan.DRAFT);
         pesanan.setWaktu(new Date());
@@ -70,7 +70,7 @@ public class PesananService {
 
             PesananItem pesananItem = new PesananItem();
             pesananItem.setUuid(UUID.randomUUID().toString());
-            pesananItem.setProduct(product.get());
+            pesananItem.setProductId(product.get().getId());
             pesananItem.setHarga(product.get().getHarga());
             pesananItem.setKuantitas(cart.getQty());
 
@@ -78,7 +78,7 @@ public class PesananService {
             int qty = pesananItem.getKuantitas().intValue();
             Integer total = hrg * qty;
             pesananItem.setJumlah(BigInteger.valueOf(total));
-            pesananItem.setPemesanan(pesanan);
+            pesananItem.setPemesananId(pesanan.getId());
             
             pemesanan.add(pesananItem);
         
@@ -97,10 +97,10 @@ public class PesananService {
         
         for (PesananItem p : pemesanan) {
             pesananItemRepository.save(p);
-            ProductEntity product = new ProductEntity(p.getProduct().getId());
+            ProductEntity product = new ProductEntity(p.getProductId());
             product.setStok(product.getStok()-p.getKuantitas().intValue());
             productRepository.save(product);
-            cartService.delete(username, p.getProduct().getUuid());
+            cartService.delete(username, p.getProductId());
         }
         
         pesananLogService.saveLog(username, pesanan, PesananLogService.DRAFT, "Pesanan berhasil dibuat!");
@@ -121,7 +121,7 @@ public class PesananService {
         PesananEntity pesanan = pesananRepository.findByUuid(uuid).orElseThrow(()-> new ResourceNotFoundException(
                 "Pesanan tidak ditemukan!"));
 
-        if(!username.equals(pesanan.getUser().getUsername())){
+        if(!username.equals(pesanan.getUserId())){
             throw new BadRequestException("Pesanan hanya dapat dibatalkan oleh yang bersangkutan!");
         }
 
@@ -147,7 +147,7 @@ public class PesananService {
         PesananEntity pesanan = pesananRepository.findByUuid(uuid).orElseThrow(()-> new ResourceNotFoundException("Pesanan " +
                 "tidak ditemukan!"));
 
-        if(!username.equals(pesanan.getUser().getUsername())){
+        if(!username.equals(pesanan.getUserId())){
             throw new BadRequestException("Pesanan hanya dapat dibatalkan oleh yang bersangkutan!");
         }
 
@@ -165,7 +165,7 @@ public class PesananService {
     }
 
     public List<PesananEntity> findAllPesanan(String username, int page, int limit){
-        return pesananRepository.findByUserUsername(username, PageRequest.of(page, limit, Sort.by("waktu_pemesanan").descending()));
+        return pesananRepository.findByUserId(username, PageRequest.of(page, limit, Sort.by("waktu_pemesanan").descending()));
     }
     
     @Transactional

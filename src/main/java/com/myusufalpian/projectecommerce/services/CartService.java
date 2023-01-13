@@ -16,6 +16,7 @@ import com.myusufalpian.projectecommerce.models.entities.ProductEntity;
 import com.myusufalpian.projectecommerce.models.entities.UserEntity;
 import com.myusufalpian.projectecommerce.models.repositories.KeranjangRepository;
 import com.myusufalpian.projectecommerce.models.repositories.ProductRepository;
+import com.myusufalpian.projectecommerce.models.repositories.UserRepository;
 
 @Service
 public class CartService {
@@ -26,39 +27,44 @@ public class CartService {
     @Autowired
     private KeranjangRepository keranjangRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @Transactional
-    public KeranjangEntity save(String username, String productUuid, BigInteger qty){
+    public KeranjangEntity save(String username, Integer productId, BigInteger qty){
         
-        ProductEntity product = productRepository.findByUuid(productUuid).orElseThrow(()-> new RuntimeException(
+        ProductEntity product = productRepository.findById(productId).orElseThrow(()-> new RuntimeException(
                 "Product not " +
                 "found!"));
         
-        Optional<KeranjangEntity> keranjang = keranjangRepository.findByUserUsernameAndProductUuid(username, productUuid);
+        Optional<KeranjangEntity> keranjang = keranjangRepository.findByUserIdAndProductId(username, productId);
+
+        Optional<UserEntity> user = userRepository.findByUsername(username);
         
         KeranjangEntity keranjangEntity;
 
         if(keranjang.isPresent()){
-            
+
             keranjangEntity = keranjang.get();
 
-            int kuantitas = keranjangEntity.getKuantitas().intValue();
+            int kuantitas = keranjang.get().getKuantitas().intValue();
             int quantity = qty.intValue();
             Integer Qty = kuantitas + quantity;
-            keranjangEntity.setKuantitas(BigInteger.valueOf(Qty));
+            keranjang.get().setKuantitas(BigInteger.valueOf(Qty));
             
             int tot = keranjang.get().getHarga().intValue();
-            int brg = keranjangEntity.getKuantitas().intValue();
+            int brg = keranjang.get().getKuantitas().intValue();
             Integer total = tot * brg;
-            keranjangEntity.setTotal(BigInteger.valueOf(total));
+            keranjang.get().setTotal(BigInteger.valueOf(total));
             
-            keranjangRepository.save(keranjangEntity);
+            keranjangRepository.save(keranjang.get());
         
         }else{
         
             keranjangEntity = new KeranjangEntity();
         
             keranjangEntity.setUuid(UUID.randomUUID().toString());
-            keranjangEntity.setProduct(product);
+            keranjangEntity.setProductId(product.getId());
             keranjangEntity.setKuantitas(qty);
             keranjangEntity.setHarga(product.getHarga());
         
@@ -68,7 +74,7 @@ public class CartService {
             keranjangEntity.setTotal(BigInteger.valueOf(total));
         
             keranjangEntity.setWaktu(new Date());
-            keranjangEntity.setUser(new UserEntity(username));
+            keranjangEntity.setUserId(user.get().getUsername());
         
             keranjangRepository.save(keranjangEntity);
         
@@ -79,9 +85,9 @@ public class CartService {
     }
     
     @Transactional
-    public KeranjangEntity updateQty(String username, String productUuid, BigInteger qty){
+    public KeranjangEntity updateQty(String username, Integer productId, BigInteger qty){
         KeranjangEntity keranjang =
-                keranjangRepository.findByUserUsernameAndProductUuid(username, productUuid).orElseThrow(()-> new BadRequestException("Produk tidak ditemukan didalam keranjang anda"));
+                keranjangRepository.findByUserIdAndProductId(username, productId).orElseThrow(()-> new BadRequestException("Produk tidak ditemukan didalam keranjang anda"));
         keranjang.setKuantitas(qty);
         int tot = keranjang.getHarga().intValue();
             int brg = keranjang.getKuantitas().intValue();
@@ -93,14 +99,14 @@ public class CartService {
     }
 
     @Transactional
-    public void delete(String username, String productUuid){
+    public void delete(String username, Integer productId){
         KeranjangEntity keranjang =
-                keranjangRepository.findByUserUsernameAndProductUuid(username, productUuid).orElseThrow(()-> new BadRequestException("Produk tidak ditemukan didalam keranjang anda"));
+                keranjangRepository.findByUserIdAndProductId(username, productId).orElseThrow(()-> new BadRequestException("Produk tidak ditemukan didalam keranjang anda"));
         keranjangRepository.delete(keranjang);
     }
 
     @Transactional
     public List<KeranjangEntity> findByUserUsername(String username){
-        return keranjangRepository.findByUserUsername(username);
+        return keranjangRepository.findByUserId(username);
     }
 }
