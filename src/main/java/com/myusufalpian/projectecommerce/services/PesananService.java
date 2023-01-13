@@ -22,7 +22,6 @@ import com.myusufalpian.projectecommerce.models.entities.PesananEntity;
 import com.myusufalpian.projectecommerce.models.entities.PesananItem;
 import com.myusufalpian.projectecommerce.models.entities.ProductEntity;
 import com.myusufalpian.projectecommerce.models.entities.StatusPesanan;
-import com.myusufalpian.projectecommerce.models.entities.UserEntity;
 import com.myusufalpian.projectecommerce.models.repositories.PesananItemRepository;
 import com.myusufalpian.projectecommerce.models.repositories.PesananRepository;
 import com.myusufalpian.projectecommerce.models.repositories.ProductRepository;

@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
-public class CorsFilter implements Filter{
+public class CORSFilter implements Filter{
     @Value("${access-control.allow-origin:*}")
 	private String allowOrigin;
 	

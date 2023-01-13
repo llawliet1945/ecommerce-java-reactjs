@@ -1,7 +1,6 @@
 package com.myusufalpian.projectecommerce.models.repositories;
 
 import com.myusufalpian.projectecommerce.models.entities.ProductEntity;
-import org.springframework.data.domain.Example;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import javax.websocket.server.PathParam;
