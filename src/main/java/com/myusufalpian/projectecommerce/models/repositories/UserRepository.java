@@ -8,11 +8,11 @@ import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<UserEntity, String> {
-    public UserEntity findByNama(@PathParam("nama") String nama);
+    List<UserEntity> findByNama(@PathParam("nama") String nama);
 
     Optional<UserEntity> findByUsername(String username);
 
-    public UserEntity findByEmail(@PathParam("email") String email);
+    Optional<UserEntity> findByEmail(@PathParam("email") String email);
     public List<UserEntity> findByNamaStartingWith(@PathParam("nama") String nama);
 
     boolean existsByEmail(String username);

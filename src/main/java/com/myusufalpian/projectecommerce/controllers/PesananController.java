@@ -2,80 +2,63 @@ package com.myusufalpian.projectecommerce.controllers;
 
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import com.myusufalpian.projectecommerce.dto.PesananRequestDTO;
 import com.myusufalpian.projectecommerce.dto.PesananResponseDTO;
 import com.myusufalpian.projectecommerce.models.entities.PesananEntity;
-import com.myusufalpian.projectecommerce.securities.service.UserDetailsImplementation;
 import com.myusufalpian.projectecommerce.services.PesananService;
 
 @RestController
 @RequestMapping("/api/orders")
-@PreAuthorize("isAuthenticated()")
 public class PesananController {
     
     @Autowired
     private PesananService pesananService;
 
     @PostMapping("/addNewOrder")
-    @PreAuthorize("hasAuthority('user')")
-    public PesananResponseDTO addNewOrder(@AuthenticationPrincipal UserDetailsImplementation user, @RequestBody PesananRequestDTO request){
-        return pesananService.add(user.getUsername(), request);
+    public ResponseEntity<String> addNewOrder(@RequestHeader String username, @RequestBody PesananRequestDTO request) throws JsonProcessingException {
+        return pesananService.add(username, request);
     }
 
     @PatchMapping("/{id}/cancel")
-    @PreAuthorize("hasAuthority('user')")
-    public PesananEntity cancelOrder(@AuthenticationPrincipal UserDetailsImplementation user, @PathVariable String id){
-        return pesananService.cancel(id, user.getUsername());
+    public ResponseEntity<String> cancelOrder(@RequestHeader String username, @PathVariable String id) throws JsonProcessingException {
+        return pesananService.cancel(id, username);
     }
 
     @PatchMapping("/{id}/receive")
-    @PreAuthorize("hasAuthority('user')")
-    public PesananEntity receiveOrder(@AuthenticationPrincipal UserDetailsImplementation user, @PathVariable String id){
-        return pesananService.receive(id, user.getUsername());
+    public ResponseEntity<String> receiveOrder(@RequestHeader String username, @PathVariable String id) throws JsonProcessingException {
+        return pesananService.receive(id, username);
     }
 
     @PatchMapping("/{id}/confirm")
-    @PreAuthorize("hasAuthority('admin')")
-    public PesananEntity confirmationPayment(@AuthenticationPrincipal UserDetailsImplementation user, @PathVariable String id){
-        return pesananService.confirmationPayment(id, user.getUsername());
+    public ResponseEntity<String> confirmationPayment(@RequestHeader String username, @PathVariable String id) throws JsonProcessingException {
+        return pesananService.confirmationPayment(id, username);
     }
     
     @PatchMapping("/{id}/packing")
-    @PreAuthorize("hasAuthority('admin')")
-    public PesananEntity packing(@AuthenticationPrincipal UserDetailsImplementation user, @PathVariable String id){
-        return pesananService.packing(id, user.getUsername());
+    public ResponseEntity<String> packing(@RequestHeader String username, @PathVariable String id) throws JsonProcessingException {
+        return pesananService.packing(id, username);
     }
     
     @PatchMapping("/{id}/sent")
-    @PreAuthorize("hasAuthority('admin')")
-    public PesananEntity sent(@AuthenticationPrincipal UserDetailsImplementation user, @PathVariable String id){
-        return pesananService.sent(id, user.getUsername());
+    public ResponseEntity<String> sent(@RequestHeader String username, @PathVariable String id) throws JsonProcessingException {
+        return pesananService.sent(id, username);
     }
 
     @GetMapping("/getAllData")
-    @PreAuthorize("hasAuthority('user')")
-    public List<PesananEntity> getAllData(@AuthenticationPrincipal UserDetailsImplementation user, @RequestParam(name = "page", defaultValue = "0", required = false) Integer page, @RequestParam(name = "limit", defaultValue = "25", required = false) Integer limit){
-        return pesananService.findAllPesanan(user.getUsername(), page, limit);
+    public ResponseEntity<String> getAllData(@RequestHeader String username, @RequestParam(name = "page", defaultValue = "0", required = false) Integer page, @RequestParam(name = "limit", defaultValue = "25", required = false) Integer limit) throws JsonProcessingException {
+        return pesananService.findAllPesanan(username, page, limit);
     }
 
     @GetMapping("/getOrderItems")
-    @PreAuthorize("hasAuthority('user')")
-    public List<PesananEntity> getOrderItems(@AuthenticationPrincipal  UserDetailsImplementation user, 
+    public ResponseEntity<String> getOrderItems(@RequestHeader String username,
         @RequestParam(name = "page", defaultValue = "0", required = false) Integer page,
         @RequestParam(name = "limit", defaultValue = "25", required = false) Integer limit,
-        @RequestParam(name = "filterText", defaultValue = "", required = false) String filterText){
+        @RequestParam(name = "filterText", defaultValue = "", required = false) String filterText) throws JsonProcessingException {
         return pesananService.search(filterText, page, limit);
     }
 }

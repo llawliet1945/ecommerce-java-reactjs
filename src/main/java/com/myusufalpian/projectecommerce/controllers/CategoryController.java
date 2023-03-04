@@ -1,5 +1,6 @@
 package com.myusufalpian.projectecommerce.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.myusufalpian.projectecommerce.dto.ResponseData;
 import com.myusufalpian.projectecommerce.models.entities.CategoryEntity;
 import com.myusufalpian.projectecommerce.services.CategoryService;
@@ -22,54 +23,27 @@ public class CategoryController {
     private CategoryService categoryService;
 
     @GetMapping("getAllData")
-    public List<CategoryEntity> getAllData(){
+    public ResponseEntity<String> getAllData() throws JsonProcessingException {
         return categoryService.findAll();
     }
 
     @GetMapping("getById")
-    public CategoryEntity getById(@RequestParam String uuid){
+    public ResponseEntity<String> getById(@RequestParam String uuid) throws JsonProcessingException {
         return categoryService.findByUuid(uuid);
     }
 
     @PostMapping("addNewCategory")
-    public ResponseEntity<ResponseData<CategoryEntity>> save(@RequestBody CategoryEntity param, Errors errors) {
-        ResponseData<CategoryEntity> responseData = new ResponseData<>();
-        if(errors.hasErrors()){
-            for (ObjectError objectError : errors.getAllErrors()){
-                responseData.getMessages().add(objectError.getDefaultMessage());
-            }
-            responseData.setStatus(false);
-            responseData.setPayload(null);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseData);
-        }
-        responseData.setStatus(true);
-        responseData.setMessages(Collections.singletonList("Kategori sukses ditambahkan!"));
-        responseData.setPayload(categoryService.save(param));
-        return ResponseEntity.ok(responseData);
+    public ResponseEntity<String> save(@RequestBody CategoryEntity param) throws JsonProcessingException {
+        return categoryService.save(param);
     }
 
     @PutMapping("updateCategory")
-    public ResponseEntity<ResponseData<CategoryEntity>> updateCategory(@RequestBody CategoryEntity param, Errors errors) {
-
-        ResponseData<CategoryEntity> responseData = new ResponseData<>();
-
-        if(errors.hasErrors()){
-            for (ObjectError objectError : errors.getAllErrors()){
-                responseData.getMessages().add(objectError.getDefaultMessage());
-            }
-            responseData.setStatus(false);
-            responseData.setPayload(null);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseData);
-        }
-        responseData.setStatus(true);
-        responseData.setMessages(Collections.singletonList("Kategori sukses diubah!"));
-        responseData.setPayload(categoryService.update(param));
-        return ResponseEntity.ok(responseData);
+    public ResponseEntity<String> updateCategory(@RequestBody CategoryEntity param) throws JsonProcessingException {
+        return categoryService.update(param);
     }
 
     @DeleteMapping(value = "deleteCategory")
-    public Iterable<CategoryEntity> deleteData(@RequestParam String id){
-        categoryService.removeOne(id);
-        return categoryService.findAll();
+    public ResponseEntity<String> deleteData(@RequestParam String id) throws JsonProcessingException {
+        return categoryService.removeOne(id);
     }
 }

@@ -6,11 +6,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.myusufalpian.projectecommerce.utilities.GenerateResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.myusufalpian.projectecommerce.exceptions.BadRequestException;
 import com.myusufalpian.projectecommerce.models.entities.KeranjangEntity;
 import com.myusufalpian.projectecommerce.models.entities.ProductEntity;
 import com.myusufalpian.projectecommerce.models.entities.UserEntity;
@@ -31,16 +32,23 @@ public class CartService {
     private UserRepository userRepository;
 
     @Transactional
-    public KeranjangEntity save(String username, Integer productId, BigInteger qty){
+    public ResponseEntity<String> save(String username, Integer productId, BigInteger qty) throws JsonProcessingException {
         
-        ProductEntity product = productRepository.findById(productId).orElseThrow(()-> new RuntimeException(
-                "Product not " +
-                "found!"));
+        Optional<ProductEntity> product = productRepository.findById(productId);
+        if (product.isEmpty()) {
+            return GenerateResponse.notFound("Product not found!", null);
+        }
         
         Optional<KeranjangEntity> keranjang = keranjangRepository.findByUserIdAndProductId(username, productId);
+        if (keranjang.isEmpty()) {
+            return GenerateResponse.notFound("Cart not found!", null);
+        }
 
         Optional<UserEntity> user = userRepository.findByUsername(username);
-        
+        if (user.isEmpty()) {
+            return GenerateResponse.notFound("User not found!", null);
+        }
+
         KeranjangEntity keranjangEntity;
 
         if(keranjang.isPresent()){
@@ -64,9 +72,9 @@ public class CartService {
             keranjangEntity = new KeranjangEntity();
         
             keranjangEntity.setUuid(UUID.randomUUID().toString());
-            keranjangEntity.setProductId(product.getId());
+            keranjangEntity.setProductId(product.get().getId());
             keranjangEntity.setKuantitas(qty);
-            keranjangEntity.setHarga(product.getHarga());
+            keranjangEntity.setHarga(product.get().getHarga());
         
             int tot = keranjangEntity.getHarga().intValue();
             int brg = keranjangEntity.getKuantitas().intValue();
@@ -80,33 +88,42 @@ public class CartService {
         
         }
 
-        return keranjangEntity;
+        return GenerateResponse.success("Add new cart success", null);
     
     }
     
     @Transactional
-    public KeranjangEntity updateQty(String username, Integer productId, BigInteger qty){
-        KeranjangEntity keranjang =
-                keranjangRepository.findByUserIdAndProductId(username, productId).orElseThrow(()-> new BadRequestException("Produk tidak ditemukan didalam keranjang anda"));
-        keranjang.setKuantitas(qty);
-        int tot = keranjang.getHarga().intValue();
-            int brg = keranjang.getKuantitas().intValue();
+    public ResponseEntity<String> updateQty(String username, Integer productId, BigInteger qty) throws JsonProcessingException {
+        Optional<KeranjangEntity> keranjang = keranjangRepository.findByUserIdAndProductId(username, productId);
+        if (keranjang.isEmpty()) {
+            return GenerateResponse.notFound("Cart not found", null);
+        }
+        keranjang.get().setKuantitas(qty);
+        int tot = keranjang.get().getHarga().intValue();
+            int brg = keranjang.get().getKuantitas().intValue();
             Integer total = tot * brg;
-            keranjang.setTotal(BigInteger.valueOf(total));
-        keranjang.setTotal(BigInteger.valueOf(total));
-        keranjangRepository.save(keranjang);
-        return keranjang;
+            keranjang.get().setTotal(BigInteger.valueOf(total));
+        keranjang.get().setTotal(BigInteger.valueOf(total));
+        keranjangRepository.save(keranjang.get());
+        return GenerateResponse.success("Update cart success", null);
     }
 
     @Transactional
-    public void delete(String username, Integer productId){
-        KeranjangEntity keranjang =
-                keranjangRepository.findByUserIdAndProductId(username, productId).orElseThrow(()-> new BadRequestException("Produk tidak ditemukan didalam keranjang anda"));
-        keranjangRepository.delete(keranjang);
+    public ResponseEntity<String> delete(String username, Integer productId) throws JsonProcessingException {
+        Optional<KeranjangEntity> keranjang = keranjangRepository.findByUserIdAndProductId(username, productId);
+        if (keranjang.isEmpty()) {
+            return GenerateResponse.notFound("Cart not found", null);
+        }
+        keranjangRepository.delete(keranjang.get());
+        return GenerateResponse.success("Delete cart success", null);
     }
 
     @Transactional
-    public List<KeranjangEntity> findByUserUsername(String username){
-        return keranjangRepository.findByUserId(username);
+    public ResponseEntity<String> findByUserUsername(String username) throws JsonProcessingException {
+        List<KeranjangEntity> keranjang = keranjangRepository.findByUserId(username);
+        if (keranjang.isEmpty()) {
+            return GenerateResponse.notFound("Cart not found!", null);
+        }
+        return GenerateResponse.success("Get cart success", keranjang);
     }
 }

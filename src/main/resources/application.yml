@@ -1,0 +1,24 @@
+server:
+  port: 5000
+
+spring:
+  application:
+    name: ecommerce-spring-boot
+  datasource:
+    password: admin
+    username: postgres
+    url: jdbc:postgresql://localhost:5432/ecommerce
+    hikari:
+      idle-timeout: 10000
+      maximum-pool-size: 10
+      max-lifetime: 30000
+      minimum-idle: 5
+      connection-timeout: 20000
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+
+jwt:
+  expirationMs: 3600000
+  secret: 35FC4B06B9E86426C77D2FEC783BBF1630A28454EBD906B69442120EE4A6A2FD

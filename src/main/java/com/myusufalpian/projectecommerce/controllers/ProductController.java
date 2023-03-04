@@ -1,18 +1,12 @@
 package com.myusufalpian.projectecommerce.controllers;
 
-import com.myusufalpian.projectecommerce.dto.ResponseData;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.myusufalpian.projectecommerce.dto.SearchData;
 import com.myusufalpian.projectecommerce.models.entities.ProductEntity;
 import com.myusufalpian.projectecommerce.services.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.Errors;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Collections;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/product")
@@ -21,64 +15,37 @@ public class ProductController {
     private ProductService productService;
 
     @GetMapping("getAllData")
-    public Iterable<ProductEntity> getAllData(){
+    public ResponseEntity<String> getAllData() throws JsonProcessingException {
         return productService.findAll();
     }
 
     @GetMapping("getById")
-    public ProductEntity getById(@RequestParam Integer id){
+    public ResponseEntity<String> getById(@RequestParam Integer id) throws JsonProcessingException {
         return productService.findById(id);
     }
 
     @PostMapping("addNewProduct")
-    public ResponseEntity<ResponseData<ProductEntity>> save(@RequestBody ProductEntity param, Errors errors) {
-        ResponseData<ProductEntity> responseData = new ResponseData<>();
-        if(errors.hasErrors()){
-            for (ObjectError objectError : errors.getAllErrors()){
-                responseData.getMessages().add(objectError.getDefaultMessage());
-            }
-            responseData.setStatus(false);
-            responseData.setPayload(null);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseData);
-        }
-        responseData.setStatus(true);
-        responseData.setMessages(Collections.singletonList("Produk sukses ditambahkan!"));
-        responseData.setPayload(productService.save(param));
-        return ResponseEntity.ok(responseData);
+    public ResponseEntity<String> save(@RequestBody ProductEntity param) throws JsonProcessingException {
+        return productService.save(param);
     }
 
     @PutMapping("updateProduct")
-    public ResponseEntity<ResponseData<ProductEntity>> updateProduct(@RequestBody ProductEntity param, Errors errors) {
-
-        ResponseData<ProductEntity> responseData = new ResponseData<>();
-
-        if(errors.hasErrors()){
-            for (ObjectError objectError : errors.getAllErrors()){
-                responseData.getMessages().add(objectError.getDefaultMessage());
-            }
-            responseData.setStatus(false);
-            responseData.setPayload(null);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseData);
-        }
-        responseData.setStatus(true);
-        responseData.setMessages(Collections.singletonList("Produk sukses diubah!"));
-        responseData.setPayload(productService.update(param));
-        return ResponseEntity.ok(responseData);
+    public ResponseEntity<String> updateProduct(@RequestBody ProductEntity param) throws JsonProcessingException {
+        return productService.update(param);
     }
 
     @DeleteMapping(value = "deleteProduct")
-    public Iterable<ProductEntity> deleteData(@RequestParam Integer id){
-        productService.removeOne(id);
-        return productService.findAll();
+    public ResponseEntity<String> deleteData(@RequestParam Integer id) throws JsonProcessingException {
+        return productService.removeOne(id);
     }
 
     @PostMapping(value = "getProductByNama")
-    public ProductEntity getProductByNama(@RequestBody SearchData searchData){
+    public ResponseEntity<String> getProductByNama(@RequestBody SearchData searchData) throws JsonProcessingException {
         return productService.getProductByNama(searchData.getKeyword());
     }
 
     @PostMapping(value = "getDataByNama")
-    public List<ProductEntity> getDataByNama(@RequestBody SearchData searchData){
+    public ResponseEntity<String> getDataByNama(@RequestBody SearchData searchData) throws JsonProcessingException {
         return productService.getDataByNama(searchData.getKeyword());
     }
 }

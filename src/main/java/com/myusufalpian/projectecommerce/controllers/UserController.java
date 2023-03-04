@@ -1,18 +1,12 @@
 package com.myusufalpian.projectecommerce.controllers;
 
-import com.myusufalpian.projectecommerce.dto.ResponseData;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.myusufalpian.projectecommerce.dto.SearchData;
 import com.myusufalpian.projectecommerce.models.entities.UserEntity;
 import com.myusufalpian.projectecommerce.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.Errors;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Collections;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/user")
@@ -21,69 +15,42 @@ public class UserController {
     private UserService userService;
 
     @GetMapping("getAllData")
-    public Iterable<UserEntity> getAllData(){
+    public ResponseEntity<String> getAllData() throws JsonProcessingException {
         return userService.findAll();
     }
 
     @GetMapping("getById")
-    public UserEntity getById(@RequestParam String id){
+    public ResponseEntity<String> getById(@RequestParam String id) throws JsonProcessingException {
         return userService.findById(id);
     }
 
     @PostMapping("addNewUser")
-    public ResponseEntity<ResponseData<UserEntity>> save(@RequestBody UserEntity param, Errors errors) {
-        ResponseData<UserEntity> responseData = new ResponseData<>();
-        if(errors.hasErrors()){
-            for (ObjectError objectError : errors.getAllErrors()){
-                responseData.getMessages().add(objectError.getDefaultMessage());
-            }
-            responseData.setStatus(false);
-            responseData.setPayload(null);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseData);
-        }
-        responseData.setStatus(true);
-        responseData.setMessages(Collections.singletonList("User sukses ditambahkan!"));
-        responseData.setPayload(userService.save(param));
-        return ResponseEntity.ok(responseData);
+    public ResponseEntity<String> save(@RequestBody UserEntity param) throws JsonProcessingException {
+        return userService.save(param);
     }
 
     @PutMapping("updateUser")
-    public ResponseEntity<ResponseData<UserEntity>> updateProduct(@RequestBody UserEntity param, Errors errors) {
-
-        ResponseData<UserEntity> responseData = new ResponseData<>();
-
-        if(errors.hasErrors()){
-            for (ObjectError objectError : errors.getAllErrors()){
-                responseData.getMessages().add(objectError.getDefaultMessage());
-            }
-            responseData.setStatus(false);
-            responseData.setPayload(null);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseData);
-        }
-        responseData.setStatus(true);
-        responseData.setMessages(Collections.singletonList("User sukses diubah!"));
-        responseData.setPayload(userService.update(param));
-        return ResponseEntity.ok(responseData);
+    public ResponseEntity<String> updateProduct(@RequestBody UserEntity param) throws JsonProcessingException {
+        return userService.update(param);
     }
 
     @DeleteMapping(value = "deleteUser")
-    public Iterable<UserEntity> deleteData(@RequestParam String id){
-        userService.removeOne(id);
-        return userService.findAll();
+    public ResponseEntity<String> deleteData(@RequestParam String id) throws JsonProcessingException {
+        return userService.removeOne(id);
     }
 
     @PostMapping(value = "getUserByNama")
-    public UserEntity getUserByNama(@RequestBody SearchData searchData){
+    public ResponseEntity<String> getUserByNama(@RequestBody SearchData searchData) throws JsonProcessingException {
         return userService.getUserByNama(searchData.getKeyword());
     }
 
     @PostMapping(value = "getUserByEmail")
-    public UserEntity getUserByEmail(@RequestBody SearchData searchData){
+    public ResponseEntity<String> getUserByEmail(@RequestBody SearchData searchData) throws JsonProcessingException {
         return userService.getUserByEmail(searchData.getKeyword());
     }
 
     @PostMapping(value = "getDataByNama")
-    public List<UserEntity> getDataByNama(@RequestBody SearchData searchData){
+    public ResponseEntity<String> getDataByNama(@RequestBody SearchData searchData) throws JsonProcessingException {
         return userService.getDataByNama(searchData.getKeyword());
     }
 }

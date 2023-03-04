@@ -1,15 +1,18 @@
 package com.myusufalpian.projectecommerce.services;
 
-import com.myusufalpian.projectecommerce.exceptions.BadRequestException;
-import com.myusufalpian.projectecommerce.exceptions.ResourceNotFoundException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.myusufalpian.projectecommerce.models.entities.CategoryEntity;
 import com.myusufalpian.projectecommerce.models.entities.ProductEntity;
 import com.myusufalpian.projectecommerce.models.repositories.CategoryRepository;
 import com.myusufalpian.projectecommerce.models.repositories.ProductRepository;
+import com.myusufalpian.projectecommerce.utilities.GenerateResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -21,70 +24,91 @@ public class ProductService {
     @Autowired
     private CategoryRepository categoryRepository;
 
-    public ProductEntity save(ProductEntity productEntity){
+    public ResponseEntity<String> save(ProductEntity productEntity) throws JsonProcessingException {
 
         if(!StringUtils.hasText(productEntity.getNama())){
-            throw new BadRequestException("Nama produk tidak boleh kosong!");
+            return GenerateResponse.badRequest("Username not found", null);
         }
 
         if(productEntity.getIdCategory()==null){
-            throw new BadRequestException("Kategori tidak boleh kosong!");
+            return GenerateResponse.badRequest("Kategori tidak boleh kosong!", null);
         }
 
-        categoryRepository.findById(productEntity.getIdCategory())
-                .orElseThrow(() -> new BadRequestException(
-                        "Kategori dengan id: "+productEntity.getIdCategory()+" tidak ditemukan!"
-                ));
+        Optional<CategoryEntity> category = categoryRepository.findById(productEntity.getIdCategory());
+        if (category.isEmpty()) {
+            return GenerateResponse.notFound("Kategori tidak ditemukan", null);
+        }
 
         productEntity.setUuid(UUID.randomUUID().toString());
-        return productRepository.save(productEntity);
+        productRepository.save(productEntity);
+        return GenerateResponse.success("Add new product success", null);
     }
 
-    public ProductEntity update(ProductEntity productEntity){
+    public ResponseEntity<String> update(ProductEntity productEntity) throws JsonProcessingException {
         if(!StringUtils.hasText(productEntity.getId().toString())){
-            throw new BadRequestException("Id produk tidak boleh kosong!");
+            return GenerateResponse.badRequest("Product id cannot be null", null);
         }
 
         if(!StringUtils.hasText(productEntity.getNama())){
-            throw new BadRequestException("Nama produk tidak boleh kosong!");
+            return GenerateResponse.badRequest("Product name cannot be null", null);
         }
 
         if(productEntity.getIdCategory()==null){
-            throw new BadRequestException("Kategori tidak boleh kosong!");
+            return GenerateResponse.badRequest("Category id cannot be null", null);
         }
 
-        categoryRepository.findById(productEntity.getIdCategory())
-                .orElseThrow(() -> new BadRequestException(
-                        "Kategori dengan id: "+productEntity.getIdCategory()+" tidak ditemukan!"
-                ));
-        return productRepository.save(productEntity);
+        Optional<CategoryEntity> category = categoryRepository.findById(productEntity.getIdCategory());
+        if (category.isEmpty()) {
+            return GenerateResponse.notFound("Category not found", null);
+        }
+        return GenerateResponse.badRequest("Update data success", null);
     }
 
-    public ProductEntity findById(Integer id){
-        return productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Produk dengan Id: "+
-                        id+" tidak ditemukan!"));
+    public ResponseEntity<String> findById(Integer id) throws JsonProcessingException {
+        Optional<ProductEntity> product = productRepository.findById(id);
+        if (product.isEmpty()) {
+            return GenerateResponse.notFound("Product not found", null);
+        }
+        return GenerateResponse.success("Get data success", product.get());
     }
 
-    public List<ProductEntity> findAll(){
-        return productRepository.findAll();
+    public ResponseEntity<String> findAll() throws JsonProcessingException {
+        List<ProductEntity> product = productRepository.findAll();
+        if (product.isEmpty()) {
+            return GenerateResponse.notFound("Product not found", null);
+        }
+        return GenerateResponse.success("Get data success", product);
     }
 
-    public void removeOne(Integer id){
+    public ResponseEntity<String> removeOne(Integer id) throws JsonProcessingException {
+        Optional<ProductEntity> product = productRepository.findById(id);
+        if (product.isEmpty()) {
+            return GenerateResponse.notFound("Product not found", null);
+        }
         productRepository.deleteById(id);
+        return GenerateResponse.success("Delete data success", null);
     }
 
-    public ProductEntity getProductByNama(String nama){
-        return productRepository.findByNama(nama);
+    public ResponseEntity<String> getProductByNama(String nama) throws JsonProcessingException {
+        List<ProductEntity> product = productRepository.findByNama(nama);
+        if (product.isEmpty()) {
+            return GenerateResponse.notFound("Product not found", null);
+        }
+        return GenerateResponse.success("Delete data success", product);
     }
 
-    public List<ProductEntity> getDataByNama(String nama){
-        return productRepository.findByNamaStartingWith(nama);
+    public ResponseEntity<String> getDataByNama(String nama) throws JsonProcessingException {
+        List<ProductEntity> product = productRepository.findByNamaStartingWith(nama);
+        if (product.isEmpty()) {
+            return GenerateResponse.notFound("Product not found", null);
+        }
+        return GenerateResponse.success("Get data success", product);
     }
 
-    public ProductEntity changePicture(Integer id, String gambar){
-        ProductEntity productEntity = findById(id);
-        productEntity.setGambar(gambar);
-        return productRepository.save(productEntity);
+    public ResponseEntity<String> changePicture(Integer id, String gambar) throws JsonProcessingException {
+        Optional<ProductEntity> productEntity = productRepository.findById(id);
+        productEntity.get().setGambar(gambar);
+        productRepository.save(productEntity.get());
+        return GenerateResponse.success("Update image product success", null);
     }
 }

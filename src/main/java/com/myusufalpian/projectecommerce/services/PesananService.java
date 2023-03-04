@@ -7,17 +7,18 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.UUID;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.myusufalpian.projectecommerce.utilities.GenerateResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.myusufalpian.projectecommerce.dto.CartRequest;
 import com.myusufalpian.projectecommerce.dto.PesananRequestDTO;
 import com.myusufalpian.projectecommerce.dto.PesananResponseDTO;
-import com.myusufalpian.projectecommerce.exceptions.BadRequestException;
-import com.myusufalpian.projectecommerce.exceptions.ResourceNotFoundException;
 import com.myusufalpian.projectecommerce.models.entities.PesananEntity;
 import com.myusufalpian.projectecommerce.models.entities.PesananItem;
 import com.myusufalpian.projectecommerce.models.entities.ProductEntity;
@@ -47,7 +48,7 @@ public class PesananService {
 
 
     @Transactional
-    public PesananResponseDTO add(String username, PesananRequestDTO request){
+    public ResponseEntity<String> add(String username, PesananRequestDTO request) throws JsonProcessingException {
         PesananEntity pesanan = new PesananEntity();
         pesanan.setUuid(UUID.randomUUID().toString());
         pesanan.setTanggal(new Date());
@@ -61,10 +62,12 @@ public class PesananService {
         List<PesananItem> pemesanan = new ArrayList<>();
         for (CartRequest cart : request.getItems()) {
             Optional<ProductEntity> product = productRepository.findById(cart.getProductId());
-            product.orElseThrow(()-> new BadRequestException("Product tidak ditemukan"));
+            if (product.isEmpty()) {
+                return GenerateResponse.notFound("Product not found", null);
+            }
             
             if(product.get().getStok()<cart.getQty().intValue()){
-                throw new BadRequestException("Stok produk tidak mencukupi, produk hanya tersedia: "+product.get().getStok());
+                return GenerateResponse.badRequest("Stok produk tidak mencukupi, produk hanya tersedia: "+product.get().getStok(), null);
             }
 
             PesananItem pesananItem = new PesananItem();
@@ -106,7 +109,7 @@ public class PesananService {
 
         PesananResponseDTO response = new PesananResponseDTO(save, pemesanan);
 
-        return response;
+        return GenerateResponse.success("Success add new order", response);
 
     }
 
@@ -115,117 +118,135 @@ public class PesananService {
     }
 
     @Transactional
-    public PesananEntity cancel(String uuid, String username){
+    public ResponseEntity<String> cancel(String uuid, String username) throws JsonProcessingException {
         
-        PesananEntity pesanan = pesananRepository.findByUuid(uuid).orElseThrow(()-> new ResourceNotFoundException(
-                "Pesanan tidak ditemukan!"));
-
-        if(!username.equals(pesanan.getUserId())){
-            throw new BadRequestException("Pesanan hanya dapat dibatalkan oleh yang bersangkutan!");
+        Optional<PesananEntity> pesanan = pesananRepository.findByUuid(uuid);
+        if (pesanan.isEmpty()) {
+            return GenerateResponse.notFound("Order not found", null);
         }
 
-        if(!StatusPesanan.PENGIRIMAN.equals(pesanan.getStatus())){
-            throw new BadRequestException("Pesanan tidak dapat dibatalkan karena sedang dalam proses pengiriman!");
-        }else if(!StatusPesanan.SELESAI.equals(pesanan.getStatus())){
-            throw new BadRequestException("Pesanan tidak dapat dibatalkan karena pesanan sudah diterima!");
+        if(!username.equals(pesanan.get().getUserId())){
+            return GenerateResponse.badRequest("Cancel order just can be process with user", null);
         }
 
-        pesanan.setStatus(StatusPesanan.DIBATALKAN);
-        PesananEntity save = pesananRepository.save(pesanan);
+        if(!StatusPesanan.PENGIRIMAN.equals(pesanan.get().getStatus())){
+            return GenerateResponse.badRequest("Orders cannot be canceled because they are in the process of being shipped", null);
+        }else if(!StatusPesanan.SELESAI.equals(pesanan.get().getStatus())){
+            return GenerateResponse.badRequest("OrOrders cannot be canceled because they have been received", null);
+        }
 
-        pesananLogService.saveLog(username, pesanan, PesananLogService.DIBATALKAN, "Pesanan berhasil dibatalkan!");
+        pesanan.get().setStatus(StatusPesanan.DIBATALKAN);
+        pesananRepository.save(pesanan.get());
 
-        return save;
+        pesananLogService.saveLog(username, pesanan.get(), PesananLogService.DIBATALKAN, "Pesanan berhasil dibatalkan!");
+
+        return GenerateResponse.success("Success cancel order", null);
 
     }
 
 
     @Transactional
-    public PesananEntity receive(String uuid, String username){
+    public ResponseEntity<String> receive(String uuid, String username) throws JsonProcessingException {
         
-        PesananEntity pesanan = pesananRepository.findByUuid(uuid).orElseThrow(()-> new ResourceNotFoundException("Pesanan " +
-                "tidak ditemukan!"));
-
-        if(!username.equals(pesanan.getUserId())){
-            throw new BadRequestException("Pesanan hanya dapat dibatalkan oleh yang bersangkutan!");
+        Optional<PesananEntity> pesanan = pesananRepository.findByUuid(uuid);
+        if (pesanan.isEmpty()) {
+            return GenerateResponse.notFound("Order not found", null);
         }
 
-        if(!StatusPesanan.PENGIRIMAN.equals(pesanan.getStatus())){
-            throw new BadRequestException("Penerimaan gagal, status pesanan saat ini adalah: "+ pesanan.getStatus());
+        if(!username.equals(pesanan.get().getUserId())){
+            return GenerateResponse.badRequest("Orders can only be canceled by the person concerned", null);
         }
 
-        pesanan.setStatus(StatusPesanan.SELESAI);
-        PesananEntity save = pesananRepository.save(pesanan);
+        if(!StatusPesanan.PENGIRIMAN.equals(pesanan.get().getStatus())){
+            return GenerateResponse.badRequest("Receiving failed, current order status is: "+ pesanan.get().getStatus(), null);
+        }
 
-        pesananLogService.saveLog(username, pesanan, PesananLogService.SELESAI, "Pesanan telah diterima!");
+        pesanan.get().setStatus(StatusPesanan.SELESAI);
+        pesananRepository.save(pesanan.get());
 
-        return save;
+        pesananLogService.saveLog(username, pesanan.get(), PesananLogService.SELESAI, "Pesanan telah diterima!");
+
+        return GenerateResponse.success("Order received!", null);
 
     }
 
-    public List<PesananEntity> findAllPesanan(String username, int page, int limit){
-        return pesananRepository.findByUserId(username, PageRequest.of(page, limit, Sort.by("waktu_pemesanan").descending()));
+    public ResponseEntity<String> findAllPesanan(String username, int page, int limit) throws JsonProcessingException {
+        List<PesananEntity> pesanan = pesananRepository.findByUserId(username, PageRequest.of(page, limit, Sort.by("waktu_pemesanan").descending()));
+        if (pesanan.isEmpty()) {
+            return GenerateResponse.notFound("Order not found", null);
+        }
+        return GenerateResponse.success("Get all order success", pesanan);
     }
     
     @Transactional
-    public PesananEntity confirmationPayment(String uuid, String username){
+    public ResponseEntity<String> confirmationPayment(String uuid, String username) throws JsonProcessingException {
         
-        PesananEntity pesanan = pesananRepository.findByUuid(uuid).orElseThrow(()-> new ResourceNotFoundException(
-                "Pesanan tidak ditemukan!"));
-
-        if(!StatusPesanan.DRAFT.equals(pesanan.getStatus())){
-            throw new BadRequestException("Konfirmasi pembayaran gagal, status pesanan saat ini adalah: "+ pesanan.getStatus());
+        Optional<PesananEntity> pesanan = pesananRepository.findByUuid(uuid);
+        if (pesanan.isEmpty()){
+            return GenerateResponse.notFound("Order not found", null);
         }
 
-        pesanan.setStatus(StatusPesanan.PEMBAYARAN);
-        PesananEntity save = pesananRepository.save(pesanan);
+        if(!StatusPesanan.DRAFT.equals(pesanan.get().getStatus())){
+            return GenerateResponse.notFound("Payment confirmation failed, current order status is: "+ pesanan.get().getStatus(), null);
+        }
 
-        pesananLogService.saveLog(username, pesanan, PesananLogService.PEMBAYARAN, "Pembayaran sukses dikonfirmasi, terimakasih atas pembayarannya, pesanan akan segera diproses");
+        pesanan.get().setStatus(StatusPesanan.PEMBAYARAN);
 
-        return save;
+        pesananRepository.save(pesanan.get());
+
+        pesananLogService.saveLog(username, pesanan.get(), PesananLogService.PEMBAYARAN, "Pembayaran sukses dikonfirmasi, terimakasih atas pembayarannya, pesanan akan segera diproses");
+
+        return GenerateResponse.success("Confirmation payment success", null);
 
     }
 
     @Transactional
-    public PesananEntity packing(String uuid, String username){
+    public ResponseEntity<String> packing(String uuid, String username) throws JsonProcessingException {
         
-        PesananEntity pesanan = pesananRepository.findByUuid(uuid).orElseThrow(()-> new ResourceNotFoundException(
-                "Pesanan tidak ditemukan!"));
-
-        if(!StatusPesanan.PACKING.equals(pesanan.getStatus())){
-            throw new BadRequestException("Packing pesanan belum dilakukan, status pesanan saat ini adalah: "+ pesanan.getStatus());
+        Optional<PesananEntity> pesanan = pesananRepository.findByUuid(uuid);
+        if (pesanan.isEmpty()) {
+            return GenerateResponse.notFound("Order not found", null);
         }
 
-        pesanan.setStatus(StatusPesanan.PACKING);
-        PesananEntity save = pesananRepository.save(pesanan);
+        if(!StatusPesanan.PACKING.equals(pesanan.get().getStatus())){
+            return GenerateResponse.badRequest("Order packing has not been done, the current order status is: "+ pesanan.get().getStatus(), null);
+        }
 
-        pesananLogService.saveLog(username, pesanan, PesananLogService.PACKING, "Pesanan sedang diproses dan akan segera dikirimkan ke alamat tujuan");
+        pesanan.get().setStatus(StatusPesanan.PACKING);
+        pesananRepository.save(pesanan.get());
 
-        return save;
+        pesananLogService.saveLog(username, pesanan.get(), PesananLogService.PACKING, "Pesanan sedang diproses dan akan segera dikirimkan ke alamat tujuan");
+
+        return GenerateResponse.success("Packing order success", null);
 
     }
 
     @Transactional
-    public PesananEntity sent(String uuid, String username){
+    public ResponseEntity<String> sent(String uuid, String username) throws JsonProcessingException {
         
-        PesananEntity pesanan = pesananRepository.findByUuid(uuid).orElseThrow(()-> new ResourceNotFoundException(
-                "Pesanan tidak ditemukan!"));
-
-        if(!StatusPesanan.PACKING.equals(pesanan.getStatus())){
-            throw new BadRequestException("Pengiriman pesanan belum dilakukan, status pesanan saat ini adalah: "+ pesanan.getStatus());
+        Optional<PesananEntity> pesanan = pesananRepository.findByUuid(uuid);
+        if (pesanan.isEmpty()) {
+            return GenerateResponse.notFound("Order not found!", null);
         }
 
-        pesanan.setStatus(StatusPesanan.DIKIRIM);
-        PesananEntity save = pesananRepository.save(pesanan);
+        if(!StatusPesanan.PACKING.equals(pesanan.get().getStatus())){
+            return GenerateResponse.badRequest("Order delivery has not been made, the current order status is: "+ pesanan.get().getStatus(), null);
+        }
 
-        pesananLogService.saveLog(username, pesanan, PesananLogService.PENGIRIMAN, "Pesanan sedang dikirimkan ke alamat tujuan");
+        pesanan.get().setStatus(StatusPesanan.DIKIRIM);
+        pesananRepository.save(pesanan.get());
 
-        return save;
+        pesananLogService.saveLog(username, pesanan.get(), PesananLogService.PENGIRIMAN, "Pesanan sedang dikirimkan ke alamat tujuan");
 
+        return GenerateResponse.success("Sent order success", null);
     }
 
-    public List<PesananEntity> search(String filterText, int page, int limit){
-        return pesananRepository.search(filterText, PageRequest.of(page, limit, Sort.by("waktu_pemesanan").descending()));
+    public ResponseEntity<String> search(String filterText, int page, int limit) throws JsonProcessingException {
+        List<PesananEntity> pesanan = pesananRepository.search(filterText, PageRequest.of(page, limit, Sort.by("waktu_pemesanan").descending()));
+        if (pesanan.isEmpty()){
+            return GenerateResponse.notFound("Order not found", null);
+        }
+        return GenerateResponse.success("Get data success", pesanan);
     }
 
 
