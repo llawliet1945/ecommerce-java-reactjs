@@ -18,7 +18,24 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: update
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:5000/api/auth/login
+          jwk-set-uri: http://localhost:5000/api/auth/register
 
 jwt:
   expirationMs: 3600000
   secret: 35FC4B06B9E86426C77D2FEC783BBF1630A28454EBD906B69442120EE4A6A2FD
+
+user:
+  oauth:
+    clientId: mydevelopment
+    clientSecret: 35FC4B06B9E86426C77D2FEC783BBF1630A28454EBD906B69442120EE4A6A2FD
+    redirectUris: http://localhost:5000/api/auth/login
+    accessTokenValidity : 300
+    refreshTokenValidity : 240000
+    user:
+      username: myusufalpian
+      password: admin
